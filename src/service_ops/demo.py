@@ -85,17 +85,58 @@ def render_report(evidence: dict) -> str:
     def escape(value):
         return html.escape(str(value))
 
+    invoices = overview["invoices"]
+    balances = overview["balance_by_currency"]
+    invoice_data_available = invoices is not None and balances is not None
     rows = "".join(
         "<tr>"
         + "".join(
             f"<td>{escape(invoice[key])}</td>" for key in ("number", "currency", "total", "balance")
         )
         + "</tr>"
-        for invoice in overview["invoices"]
+        for invoice in invoices or []
     )
+    if not invoice_data_available:
+        rows = '<tr><td colspan="4">Invoice data unavailable</td></tr>'
+    elif not invoices:
+        rows = '<tr><td colspan="4">No invoices found</td></tr>'
     amounts = "".join(
         f'<div class="amount">{escape(currency)} {escape(balance)}</div>'
-        for currency, balance in overview["balance_by_currency"].items()
+        for currency, balance in (balances or {}).items()
+    )
+    if not invoice_data_available:
+        amounts = '<p class="muted">Invoice data unavailable</p>'
+    elif not invoices:
+        amounts = '<p class="muted">No outstanding invoices</p>'
+    balance_heading = (
+        "Partial outstanding balance" if overview["truncated"] else "Outstanding balance"
+    )
+    incomplete = (
+        '<p class="warning" role="status">Incomplete invoice data. '
+        "These totals cover only the returned invoices, not the complete customer balance.</p>"
+        if overview["truncated"]
+        else ""
+    )
+    customer = overview["customer"]
+    contact = overview["contact"]
+    customer_details = (
+        f"<h2>{escape(customer['display_name'])}</h2>"
+        if customer is not None
+        else '<p class="muted">Customer details unavailable</p>'
+    )
+    contact_details = (
+        f"<p>{escape(contact['display_name'])}<br>"
+        f"{escape(contact['email'] or 'No email recorded')}</p>"
+        if contact is not None
+        else '<p class="muted">Contact details unavailable</p>'
+    )
+    errors = "".join(
+        f"<li>{escape(error['provider'])}: {escape(error['code'])}. "
+        f"{'Retry available.' if error['retryable'] else 'Check provider access.'}</li>"
+        for error in overview["errors"]
+    )
+    provider_errors = (
+        f"<section><h2>Provider errors</h2><ul>{errors}</ul></section>" if errors else ""
     )
     access_rows = "".join(
         f"<tr><td>{label}</td><td>{escape(evidence['manager_checks'][key]).capitalize()}</td>"
@@ -106,8 +147,11 @@ def render_report(evidence: dict) -> str:
             ("overview", "Combined overview"),
         )
     )
-    invoice_count = len(overview["invoices"])
-    settled_count = sum(Decimal(invoice["balance"]) == 0 for invoice in overview["invoices"])
+    invoice_summary = ""
+    if invoice_data_available:
+        invoice_count = len(invoices)
+        settled_count = sum(Decimal(invoice["balance"]) == 0 for invoice in invoices)
+        invoice_summary = f"<p class='muted'>{invoice_count} invoices, {settled_count} settled.</p>"
     return f"""<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
@@ -122,6 +166,7 @@ h2{{font-size:20px}}.muted{{color:#53665e}}
 article,section{{background:white;border:1px solid #d9e1da;border-radius:12px;
 padding:24px;margin:24px 0}}
 .cards article{{margin:0}}.amount{{font-size:36px;font-weight:650;margin:10px 0}}
+.warning{{color:#714600;background:#fff4d6;padding:12px;border-radius:6px}}
 .pass{{color:#176346}}table{{width:100%;border-collapse:collapse;text-align:left}}
 th,td{{padding:12px 8px;border-bottom:1px solid #e3e8e3}}th{{font-size:13px;color:#53665e}}
 code{{background:#edf2ed;padding:2px 6px;border-radius:4px}}footer{{font-size:13px;color:#53665e}}
@@ -132,13 +177,13 @@ code{{background:#edf2ed;padding:2px 6px;border-radius:4px}}footer{{font-size:13
 <p class="muted">Zoho CRM contact details and QuickBooks invoices in one read-only workflow.</p>
 </header>
 <div class="cards"><article><div class="tag">Customer record</div>
-<h2>{escape(overview["customer"]["display_name"])}</h2>
-<p>{escape(overview["contact"]["display_name"])}<br>{escape(overview["contact"]["email"])}</p>
+{customer_details}{contact_details}
 <p class="muted">Linked by configured vendor IDs. No guessed name matching.</p></article>
-<article><div class="tag">Outstanding balance</div>{amounts}
-<p class="muted">{invoice_count} invoices, {settled_count} settled.</p></article></div>
+<article><div class="tag">{balance_heading}</div>{incomplete}{amounts}
+{invoice_summary}</article></div>
 <section><h2>QuickBooks invoice records</h2><table><thead><tr><th>Invoice</th><th>Currency</th>
 <th>Total</th><th>Balance</th></tr></thead><tbody>{rows}</tbody></table></section>
+{provider_errors}
 <section><h2>Access checks passed</h2><table><thead><tr>
 <th>Operation</th><th>Manager</th><th>Engineer</th></tr></thead>
 <tbody>{access_rows}</tbody></table>

@@ -12,6 +12,7 @@ h2{font-size:20px}.muted{color:#53665e}
 article,section{background:white;border:1px solid #d9e1da;border-radius:12px;
 padding:24px;margin:24px 0}
 .cards article{margin:0}.amount{font-size:36px;font-weight:650;margin:10px 0}
+.warning{color:#714600;background:#fff4d6;padding:12px;border-radius:6px}
 .pass{color:#176346}table{width:100%;border-collapse:collapse;text-align:left}
 th,td{padding:12px 8px;border-bottom:1px solid #e3e8e3}th{font-size:13px;color:#53665e}
 code{background:#edf2ed;padding:2px 6px;border-radius:4px}footer{font-size:13px;color:#53665e}
@@ -22,13 +23,13 @@ code{background:#edf2ed;padding:2px 6px;border-radius:4px}footer{font-size:13px;
 <p class="muted">Zoho CRM contact details and QuickBooks invoices in one read-only workflow.</p>
 </header>
 <div class="cards"><article><div class="tag">Customer record</div>
-<h2>Demo Engineering Ltd</h2>
-<p>Morgan Reed<br>morgan@example.test</p>
+<h2>Demo Engineering Ltd</h2><p>Morgan Reed<br>morgan@example.test</p>
 <p class="muted">Linked by configured vendor IDs. No guessed name matching.</p></article>
 <article><div class="tag">Outstanding balance</div><div class="amount">GBP 850.00</div>
-<p class="muted">3 invoices, 1 settled.</p></article></div>
+<p class='muted'>3 invoices, 1 settled.</p></article></div>
 <section><h2>QuickBooks invoice records</h2><table><thead><tr><th>Invoice</th><th>Currency</th>
 <th>Total</th><th>Balance</th></tr></thead><tbody><tr><td>DEMO-101</td><td>GBP</td><td>1200.00</td><td>600.00</td></tr><tr><td>DEMO-102</td><td>GBP</td><td>250.00</td><td>250.00</td></tr><tr><td>DEMO-103</td><td>GBP</td><td>400.00</td><td>0.00</td></tr></tbody></table></section>
+
 <section><h2>Access checks passed</h2><table><thead><tr>
 <th>Operation</th><th>Manager</th><th>Engineer</th></tr></thead>
 <tbody><tr><td>Read contact</td><td>Allowed</td><td>Allowed</td></tr><tr><td>Read invoices</td><td>Allowed</td><td>Denied</td></tr><tr><td>Combined overview</td><td>Allowed</td><td>Denied</td></tr></tbody></table>

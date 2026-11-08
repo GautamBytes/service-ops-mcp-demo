@@ -13,7 +13,9 @@ def evidence():
 
 def test_quickbooks_failure_preserves_contact_and_marks_invoices_unavailable(evidence):
     evidence["manager_overview"].update(
-        customer=None, invoices=None, balance_by_currency=None,
+        customer=None,
+        invoices=None,
+        balance_by_currency=None,
         errors=[{"provider": "quickbooks", "code": "upstream_unavailable", "retryable": True}],
     )
     report = render_report(evidence)
@@ -34,9 +36,24 @@ def test_zoho_failure_preserves_customer_and_invoices(evidence):
     assert "DEMO-101" in report and "timeout" in report
 
 
+def test_invoice_query_failure_preserves_both_customer_records(evidence):
+    evidence["manager_overview"].update(
+        invoices=None,
+        balance_by_currency=None,
+        errors=[{"provider": "quickbooks", "code": "timeout", "retryable": True}],
+    )
+    report = render_report(evidence)
+    assert "Morgan Reed" in report and "Demo Engineering Ltd" in report
+    assert "Invoice data unavailable" in report and "timeout" in report
+    assert "Customer details unavailable" not in report and "GBP 850.00" not in report
+
+
 def test_both_provider_failures_do_not_invent_zero_balance(evidence):
     evidence["manager_overview"].update(
-        contact=None, customer=None, invoices=None, balance_by_currency=None,
+        contact=None,
+        customer=None,
+        invoices=None,
+        balance_by_currency=None,
         errors=[
             {"provider": "zoho", "code": "timeout", "retryable": True},
             {"provider": "quickbooks", "code": "access_denied", "retryable": False},
@@ -65,11 +82,14 @@ def test_truncated_invoice_result_labels_totals_as_partial(evidence):
 
 
 def test_provider_error_fields_are_escaped_and_unknown_fields_not_rendered(evidence):
-    evidence["manager_overview"]["errors"] = [{
-        "provider": '<img src="x" onerror="bad">',
-        "code": "<script>bad()</script>", "retryable": True,
-        "raw_body": "SENTINEL-SECRET",
-    }]
+    evidence["manager_overview"]["errors"] = [
+        {
+            "provider": '<img src="x" onerror="bad">',
+            "code": "<script>bad()</script>",
+            "retryable": True,
+            "raw_body": "SENTINEL-SECRET",
+        }
+    ]
     report = render_report(evidence)
     assert "&lt;img" in report and "&lt;script&gt;" in report
     assert '<img src="x"' not in report and "<script>" not in report

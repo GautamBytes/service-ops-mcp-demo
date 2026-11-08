@@ -28,7 +28,7 @@ Open `evidence/report.html` to see the report. `evidence/demo.json` contains the
 - A customer summary with invoice balances kept separate by currency.
 - Server-selected roles, with manager-only access to financial tools.
 - Bounded pagination, timeouts, one bounded retry for temporary provider errors, and redacted error messages.
-- A local report built from the MCP tool result.
+- A local report built from the MCP tool result. It preserves available records when a provider fails and labels incomplete invoice totals as partial.
 
 | Tool | Sales | Engineer | Manager |
 | --- | --- | --- | --- |
