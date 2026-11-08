@@ -1,0 +1,71 @@
+{
+  "verification": "passed",
+  "transport": "MCP stdio subprocess",
+  "data": "synthetic HTTP fixtures through the real provider adapters",
+  "live_vendor_calls": "not performed",
+  "paid_model_calls": 0,
+  "tools": [
+    "get_contact",
+    "get_customer_overview",
+    "get_invoices"
+  ],
+  "manager_overview": {
+    "source": "fixture",
+    "synthetic": true,
+    "role": "manager",
+    "customer_key": "demo-engineering",
+    "contact": {
+      "id": "5725767000000412001",
+      "display_name": "Morgan Reed",
+      "email": "morgan@example.test",
+      "account_name": "Demo Engineering Ltd"
+    },
+    "customer": {
+      "id": "42",
+      "display_name": "Demo Engineering Ltd",
+      "email": "accounts@example.test"
+    },
+    "invoices": [
+      {
+        "id": "101",
+        "customer_id": "42",
+        "number": "DEMO-101",
+        "total": "1200.00",
+        "balance": "600.00",
+        "currency": "GBP"
+      },
+      {
+        "id": "102",
+        "customer_id": "42",
+        "number": "DEMO-102",
+        "total": "250.00",
+        "balance": "250.00",
+        "currency": "GBP"
+      },
+      {
+        "id": "103",
+        "customer_id": "42",
+        "number": "DEMO-103",
+        "total": "400.00",
+        "balance": "0.00",
+        "currency": "GBP"
+      }
+    ],
+    "balance_by_currency": {
+      "GBP": "850.00"
+    },
+    "truncated": false,
+    "errors": []
+  },
+  "manager_checks": {
+    "contact_read": "allowed",
+    "invoices": "allowed",
+    "overview": "allowed"
+  },
+  "engineer_checks": {
+    "contact_read": "allowed",
+    "invoices": "denied",
+    "overview": "denied",
+    "role_argument_escalation": "denied"
+  }
+}
